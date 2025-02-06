@@ -22,7 +22,7 @@ def drawRF(showrf, gwidth, height, rfmargin):
     if showrf:
         return gwidth - rfmargin, height-rfmargin, rfmargin
     else:
-        return gwidth, height, 0
+        return gwidth,  height, 0
 
 gwidth = drawInfo(showinfo, width, infowidth)
 gwidth, gheight, rfmargin = drawRF(showrf, gwidth, height, rfmargin)
@@ -75,18 +75,13 @@ def drawGame():
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
         ranks = ["A", "B", "C"]
         files = ["1", "2", "3"]
-        x = (gwidth/3)/2
-        y = (gheight/3)/2
+        x = rfmargin + (gwidth/3)/2
         for i in range(len(ranks)):
-            rank = my_font.render(ranks[i], False, WHITE)
-            screen.blit(rank, (x, rfmargin/2))
-            file = my_font.render(files[i], False, WHITE)
-            screen.blit(file, (rfmargin/2, y))
-            x += (gwidth/3)
-            y += (gheight/3)
+            text_surface = my_font.render(ranks[i], False, WHITE)
+            screen.blit(text_surface, (x, rfmargin/2))
+            x += (gwidth/3)/2
         pygame.draw.line(screen, WHITE, (rfmargin, rfmargin), (gwidth, rfmargin))
         pygame.draw.line(screen, WHITE, (rfmargin, rfmargin), (rfmargin, height))
-        pygame.draw.line(screen, WHITE, (gwidth, rfmargin), (gwidth, height))
 
 def getPos():
     pos = pygame.mouse.get_pos()
