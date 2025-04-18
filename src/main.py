@@ -1,139 +1,138 @@
 import pygame 
 
+class Game():
+    def __init__(self):
+        self.placed = [0] * 9
+        self.left_mouse_down = False
+        self.right_mouse_down = False
+        self.running = True
+
+    def reset(self):
+        self.placed = [0] * 9
+        self.left_mouse_down = False
+        self.right_mouse_down = False
+        self.running = True
+
 #constants
 background_colour = (0, 0, 0) 
 WHITE = (255, 255, 255)
+game = Game()
 
 #variables declaration
-width, height = 1200, 800
+width, height = 800, 800
 infowidth = 300
-showinfo = True
-showrf = True #r - ranks, f - files
-rfmargin = 50
 margin = 20
 
-def drawInfo(showinfo, width, infowidth):
-    if showinfo:
-        return width - infowidth
-    else:
-        return width
-
-def drawRF(showrf, gwidth, height, rfmargin):
-    if showrf:
-        return gwidth - rfmargin, height-rfmargin, rfmargin
-    else:
-        return gwidth, height, 0
-
-gwidth = drawInfo(showinfo, width, infowidth)
-gwidth, gheight, rfmargin = drawRF(showrf, gwidth, height, rfmargin)
-
 #array declarations
-placed = [0] * 9
-
 coords1 = [0] * 9
-y, index = rfmargin, 0
+y, index = 0, 0
 for i in range(3):
-    x = rfmargin
+    x = 0
     for j in range(3):
         coords1[index] = [x,y]
-        x += (gwidth-rfmargin)/3
+        x += (width)/3
         index += 1
-    y += gheight/3
+    y += height/3
 
 coords2= [0] * 9
-y, w, index = margin+rfmargin, (gheight/3)-margin, 0
+y, w, index = margin, (height/3)-margin, 0
 for i in range(3):
-    x, z = margin+rfmargin, (gwidth/3)-margin
+    x, z = margin, (width/3)-margin
     for j in range(3):
         coords2[index] = [[[x, y], [z, w]], [[z, y], [x, w]]]
-        x += (gwidth-rfmargin)/3
-        z += (gwidth-rfmargin)/3
+        x += (width)/3
+        z += (width)/3
         index += 1
-    y += (gheight/3)
-    w += (gheight/3)
+    y += (height/3)
+    w += (height/3)
 
 limits = [0] * 9
 z, index = 0, 0
 for i in range(3):
     x = 0
     for j in range(3):
-        limits[index] = [[x, x + (gheight/3)], [z, z + (gheight/3)]]
-        x += (gwidth/3)
+        limits[index] = [[x, x + (height/3)], [z, z + (height/3)]]
+        x += (width/3)
         index += 1
-    z += (gheight/3)
+    z += (height/3)
 
 #game logic
 def drawGame():
-    pygame.draw.line(screen, WHITE, (gwidth/3, rfmargin), (gwidth/3, height))
-    pygame.draw.line(screen, WHITE, ((gwidth/3)*2, rfmargin), ((gwidth/3)*2, height))
-    pygame.draw.line(screen, WHITE, (rfmargin, height/3), (gwidth, height/3))
-    pygame.draw.line(screen, WHITE, (rfmargin, (height/3)*2), (gwidth, (height/3)*2))
-    if showinfo:
-        pygame.draw.line(screen, WHITE, (gwidth, rfmargin), (gwidth, height))
-    if showrf:
-        pygame.font.init()
-        my_font = pygame.font.SysFont('Comic Sans MS', 30)
-        ranks = ["A", "B", "C"]
-        files = ["1", "2", "3"]
-        x = (gwidth/3)/2
-        y = (gheight/3)/2
-        for i in range(len(ranks)):
-            rank = my_font.render(ranks[i], False, WHITE)
-            screen.blit(rank, (x, rfmargin/2))
-            file = my_font.render(files[i], False, WHITE)
-            screen.blit(file, (rfmargin/2, y))
-            x += (gwidth/3)
-            y += (gheight/3)
-        pygame.draw.line(screen, WHITE, (rfmargin, rfmargin), (gwidth, rfmargin))
-        pygame.draw.line(screen, WHITE, (rfmargin, rfmargin), (rfmargin, height))
-        pygame.draw.line(screen, WHITE, (gwidth, rfmargin), (gwidth, height))
+    pygame.draw.line(screen, WHITE, (width/3, 0), (width/3, height))
+    pygame.draw.line(screen, WHITE, ((width/3)*2, 0), ((width/3)*2, height))
+    pygame.draw.line(screen, WHITE, (0, height/3), (width, height/3))
+    pygame.draw.line(screen, WHITE, (0, (height/3)*2), (width, (height/3)*2))
 
 def getPos():
     pos = pygame.mouse.get_pos()
     return (pos)
 
+def reset():
+    screen.fill(background_colour)
+    drawGame()
+    pygame.display.flip()
+    game.reset()
+
+
+def won():
+    # left upper to right bottom corner
+    if game.placed[0] != 0 and game.placed[0] == game.placed[4] == game.placed[8]:
+        return True
+    # right upper to left bottom corner
+    if game.placed[2] != 0 and game.placed[2] == game.placed[4] == game.placed[6]:
+        return True
+    #vertical lines check
+    vert = 0
+    while vert <= len(game.placed)-3:
+        if game.placed[vert] != 0 and game.placed[vert] == game.placed[vert+1] == game.placed[vert+2]:
+            return True
+        vert += 3
+    #horizontal lines check
+    for i in range(0, 3):
+        if game.placed[i] != 0 and game.placed[i] == game.placed[i+3] == game.placed[i+6]:
+            return True
+    return False
+
 def drawFigure(figure):
     pos=getPos()
     print(pos)
     for i in range(len(limits)):
-        if (limits[i][0][0] < pos[0] < limits[i][0][1]) and (limits[i][1][0] < pos[1] < limits[i][1][1]) and (placed[i] == 0):
+        if (limits[i][0][0] < pos[0] < limits[i][0][1]) and (limits[i][1][0] < pos[1] < limits[i][1][1]) and (game.placed[i] == 0):
             if figure:
-                pygame.draw.ellipse(screen, WHITE, (coords1[i][0]+margin, coords1[i][1]+margin, gwidth/3-margin*2-rfmargin, height/3-margin*2-rfmargin), width=1)
-                placed[i] = 1;
+                pygame.draw.ellipse(screen, WHITE, (coords1[i][0]+margin, coords1[i][1]+margin, width/3-margin*2, height/3-margin*2), width=1)
+                game.placed[i] = 1
             else:
                 pygame.draw.line(screen, WHITE, coords2[i][0][0], coords2[i][0][1])
                 pygame.draw.line(screen, WHITE, coords2[i][1][0], coords2[i][1][1])
-                placed[i] = 2;
+                game.placed[i] = 2
             break
+    print(game.placed)
+    if won():
+        reset()
+
 
 #game declaration
 screen = pygame.display.set_mode((width, height)) 
 pygame.display.set_caption('Fortnite') 
-screen.fill(background_colour) 
-drawGame()
-pygame.display.flip() 
+reset()
 
 #game loop
-left_mouse_down = False
-right_mouse_down = False
-running = True
-
-while running: 
+while game.running:
     for event in pygame.event.get(): 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                left_mouse_down = True
+                game.left_mouse_down = True
                 drawFigure(True)
                 pygame.display.update()
             if event.button == 3:
-                right_mouse_down = True
+                game.right_mouse_down = True
                 drawFigure(False)
                 pygame.display.update()
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                left_mouse_down = False
+                game.left_mouse_down = False
             if event.button == 3:
-                 right_mouse_down = False
+                 game.right_mouse_down = False
 
         if event.type == pygame.QUIT: 
-            running = False
+            game.running = False
