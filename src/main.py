@@ -93,23 +93,34 @@ def won():
             return True
     return False
 
-def drawFigure(figure):
+def drawFigure(figure, check=False):
     pos=getPos()
-    print(pos)
     for i in range(len(limits)):
-        if (limits[i][0][0] < pos[0] < limits[i][0][1]) and (limits[i][1][0] < pos[1] < limits[i][1][1]) and (game.placed[i] == 0):
+        if (limits[i][0][0] < pos[0] < limits[i][0][1]) and (limits[i][1][0] < pos[1] < limits[i][1][1]) and (game.placed[i] == 0 or check):
+            holder = game.placed[i]
             if figure:
-                pygame.draw.ellipse(screen, WHITE, (coords1[i][0]+margin, coords1[i][1]+margin, width/3-margin*2, height/3-margin*2), width=1)
                 game.placed[i] = 1
+                if not check:
+                    pygame.draw.ellipse(screen, WHITE, (coords1[i][0]+margin, coords1[i][1]+margin, width/3-margin*2, height/3-margin*2), width=1)
             else:
-                pygame.draw.line(screen, WHITE, coords2[i][0][0], coords2[i][0][1])
-                pygame.draw.line(screen, WHITE, coords2[i][1][0], coords2[i][1][1])
                 game.placed[i] = 2
+                if not check:
+                    pygame.draw.line(screen, WHITE, coords2[i][0][0], coords2[i][0][1])
+                    pygame.draw.line(screen, WHITE, coords2[i][1][0], coords2[i][1][1])
             break
     print(game.placed)
     if won():
+        if check:
+            game.placed[i] = holder
+            return True
         reset()
-
+    else:
+        if not check:
+            if drawFigure(not figure, True):
+                print("Blocked a win")
+        else:
+            game.placed[i] = holder if check else game.placed[i]
+    return False
 
 #game declaration
 screen = pygame.display.set_mode((width, height)) 
